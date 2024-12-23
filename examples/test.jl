@@ -22,8 +22,8 @@ function set_leds(fpga::FPGA, ledArray::BitVector)
       ledOut |= 1 << (i-1)
     end
   end
-  OpalKelly.SetWireInValue(fpga, 0, ledOut)
-  OpalKelly.UpdateWireIns(fpga)
+  OpalKelly.set_wire_in_value(fpga, 0, ledOut)
+  OpalKelly.update_wire_ins(fpga)
 end
 
 function led_test(fpga::FPGA)
@@ -32,13 +32,13 @@ function led_test(fpga::FPGA)
   addr::Int = 0;
   for v = 0:255
     value = UInt32(v);
-    @show_error SetWireInValue(fpga, addr, value);
-    @show_error UpdateWireIns(fpga);
+    @show_error set_wire_in_value(fpga, addr, value);
+    @show_error update_wire_ins(fpga);
     sleep(0.05)
   end
 
-  @show_error SetWireInValue(fpga, addr, UInt32(0));
-  @show_error UpdateWireIns(fpga);
+  @show_error set_wire_in_value(fpga, addr, UInt32(0));
+  @show_error update_wire_ins(fpga);
 end
 
 

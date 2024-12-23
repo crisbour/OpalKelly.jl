@@ -12,31 +12,31 @@ function open_board(fpga::FPGA)
   getlibrary(fpga)
 
   println("Scanning USB for Opal Kelly devices...")
-  nDevices = GetDeviceCount(fpga)
+  nDevices = get_device_count(fpga)
   println("Found ", nDevices, " Opal Kelly device(s)")
 
   #Get Serial Number
-  serialnumber = GetDeviceListSerial(fpga, fpga.id)
+  serialnumber = get_device_list_serial(fpga, fpga.id)
   println("Serial number of device $(fpga.id) is ", serialnumber)
 
   #Open by serial
-  err = OpenBySerial(fpga, serialnumber)
+  err = open_by_serial(fpga, serialnumber)
   if err != ok_NoError
     @error "Device could not be opened. Is one connected? ERROR: $err"
     return err
   end
-  id = GetDeviceID(fpga)
-  board_model = GetBoardModel(fpga)
+  id = get_device_id(fpga)
+  board_model = get_board_model(fpga)
   @info "Device opened with id=$id and board model=$board_model"
 
   #configure on-board PLL
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_LoadDefaultPLLConfiguration), Cint, (Ptr{Nothing},), fpga.board)
 end
 
-function uploadFpgaBitfile(fpga::FPGA, bit_file_path)
+function upload_fpga_bitfile(fpga::FPGA, bit_file_path)
 
   #upload configuration file
-  err::ErrorCode = ConfigureFPGA(fpga, bit_file_path)
+  err::ErrorCode = configure_fpga(fpga, bit_file_path)
   if err != ok_NoError
     @error "FPGA configuration failed with error: $err"
   else
@@ -46,11 +46,11 @@ function uploadFpgaBitfile(fpga::FPGA, bit_file_path)
 
 
   #Check if FrontPanel Support is enabled
-  if !IsFrontPanelEnabled(fpga)
+  if !is_front_panel_enabled(fpga)
     @warn "FrontPanel not enabled"
   end
 
-  UpdateWireOuts(fpga)
+  update_wire_outs(fpga)
   # TODO: Get Firmware version and board version
   #boardId = GetWireOutValue(fpga,WireOutBoardId)
   #boardVersion = GetWireOutValue(fpga,WireOutBoardVersion)
@@ -59,5 +59,5 @@ end
 function init_board!(fpga::FPGA)
   getlibrary(fpga)
   open_board(fpga)
-  uploadFpgaBitfile(fpga, fpga.bitfile)
+  upload_fpga_bitfile(fpga, fpga.bitfile)
 end
