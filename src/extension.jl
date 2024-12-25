@@ -77,7 +77,7 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; p
   epvalue::Vector{UInt8} = fill(UInt8(0), bsize)
 
   if psize == bsize
-    err, epvalue = read_from_block_pipe_out(fpga, epaddr, blksize, bsize, pv)
+    err, epvalue = read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
     if err != ok_NoError
       @error "read_from_block_pipe_out failed with error: $err"
     end
