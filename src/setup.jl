@@ -14,6 +14,10 @@ function open_board(fpga::FPGA)
   println("Scanning USB for Opal Kelly devices...")
   nDevices = get_device_count(fpga)
   println("Found ", nDevices, " Opal Kelly device(s)")
+  if nDevices < 1
+    @error "No FPGA is plugged in!"
+    exit(-1)
+  end
 
   #Get Serial Number
   serialnumber = get_device_list_serial(fpga, fpga.id)
@@ -33,18 +37,26 @@ function open_board(fpga::FPGA)
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_LoadDefaultPLLConfiguration), Cint, (Ptr{Nothing},), fpga.board)
 end
 
-function upload_fpga_bitfile(fpga::FPGA, bit_file_path)
+function upload_fpga_bitfile(fpga::FPGA, bitfile_path)
   if !is_open(fpga)
     @error "FPGA connection not opened! Cannot upload bitfile."
   end
 
+  # Check bitfile exists:
+  if isfile(bitfile_path)
+      @info "Located bit file $bitfile_path"
+  else
+      error("Error: No bit file $bitfile_path")
+      return
+  end
+
   #upload configuration file
-  err::ErrorCode = configure_fpga(fpga, bit_file_path)
+  err::ErrorCode = configure_fpga(fpga, bitfile_path)
   if err != ok_NoError
     @error "FPGA configuration failed with error: $err"
   else
     # Log the bitfile path
-    fpga.bitfile = bit_file_path
+    fpga.bitfile = bitfile_path
   end
 
   #Check if FrontPanel Support is enabled
