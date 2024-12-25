@@ -22,8 +22,8 @@ function set_leds(fpga::FPGA, ledArray::BitVector)
       ledOut |= 1 << (i-1)
     end
   end
-  OpalKelly.set_wire_in_value(fpga, 0, ledOut)
-  OpalKelly.update_wire_ins(fpga)
+  set_wire_in_value(fpga, 0, ledOut)
+  update_wire_ins(fpga)
 end
 
 function led_test(fpga::FPGA)
