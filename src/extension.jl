@@ -1,4 +1,4 @@
-function get_wire_out_value(fpga::FPGA, epaddr::Array{Int})::Array{UInt8}
+function get_wire_out_value(fpga::FPGA, epaddr::Array{Integer})::Array{UInt8}
   #GETWIREOUTVALUE  Read the WireOut values from the device.
   #  epVAL=GETWIREOUTVALUE(OBJ,epADDR) returns the values of the WireOut
   #  endpoint in epVAL. The elements of epVAL are unsigned bytes
@@ -22,7 +22,7 @@ function get_wire_out_value(fpga::FPGA, epaddr::Array{Int})::Array{UInt8}
   epval
 end
 
-function set_wire_in_value(fpga::FPGA, epaddr, epvalue, epmask)
+function set_wire_in_value(fpga::FPGA, epaddr::Array{Integer, D}, epvalue::Array{Integer, D}, epmask::Array{UInt32, D}) where D
 
 #SETWIREINVALUE  Write into WireIn values of the device.
 #  SETWIREINVALUE(OBJ,epADDR,epVALUE,epMASK) writes
@@ -47,7 +47,7 @@ end
 
 
 # read_from_block_pipe_out in packet size at a time
-function read_from_block_pipe_out(fpga::FPGA, epaddr::Int, blksize, bsize; psize=nothing)::Vector{UInt8}
+function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; psize=nothing)::Vector{UInt8}
   #READFROMBLOCKPIPEOUT  Read data from a Block PipeOut.
   #  epVALUE=READFROMBLOCKPIPEOUT(OBJ,epADDR,BLKSIZE,SIZE) reads SIZE number of elements
   #  from a PipeOut endpoint.  The elements of evVALUE are unsigned bytes
@@ -99,7 +99,7 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Int, blksize, bsize; psize
   epvalue
 end
 
-function read_from_pipe_out(fpga::FPGA, epaddr, bsize; psize=nothing)::Vector{UInt8}
+function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::Vector{UInt8}
   #READFROMPIPEOUT  Read data from a PipeOut.
   #  epVALUE=READFROMPIPEOUT(OBJ,epADDR,SIZE) reads SIZE number of elements
   #  from a PipeOut endpoint.  The elements of evVALUE are unsigned bytes
@@ -153,7 +153,7 @@ function read_from_pipe_out(fpga::FPGA, epaddr, bsize; psize=nothing)::Vector{UI
   epvalue
 end
 
-function write_to_block_pipe_in(fpga::FPGA, epaddr, blksize, epvalue::Vector{UInt8}; psize=nothing)::Union{ErrorCode, Int32}
+function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::Vector{UInt8}; psize=nothing)::Union{ErrorCode, Int32}
   #WRITETOBLOCKPIPEIN  Write data into a PipeIn.
   #  SUCCESS=WRITETOBLOCKPIPEIN(OBJ,epADDR,BLKSIZE,epVALUE) writes
   #  the elements of the vector epVALUE into a PipeIn endpoint.
@@ -214,7 +214,7 @@ function write_to_block_pipe_in(fpga::FPGA, epaddr, blksize, epvalue::Vector{UIn
   bsize
 end
 
-function write_to_pipe_in(fpga::FPGA, epaddr, epvalue::Vector{UInt8}, psize)
+function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, psize)
 #WRITETOPIPEIN  Write data into a PipeIn.
 #  SUCCESS=WRITETOPIPEIN(OBJ,epADDR,epVALUE) writes
 #  the elements of the vector epVALUE into a PipeIn endpoint.

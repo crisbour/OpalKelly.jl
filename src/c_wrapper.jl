@@ -50,11 +50,11 @@ function get_device_count(fpga::FPGA)::Int
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetDeviceCount), Cint, (Ptr{Nothing},), fpga.board)
 end
 #ok_BoardModel DLL_ENTRY okFrontPanel_GetDeviceListModel(okFrontPanel_HANDLE hnd, int num);
-function get_device_list_model(fpga::FPGA, idx::Int)::BoardModel
+function get_device_list_model(fpga::FPGA, idx::Integer)::BoardModel
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetDeviceListModel), BoardModel, (Ptr{Nothing}, Int), fpga.board, idx)
 end
 #void DLL_ENTRY okFrontPanel_GetDeviceListSerial(okFrontPanel_HANDLE hnd, int num, char *buf);
-function get_device_list_serial(fpga::FPGA, idx::Int)::String
+function get_device_list_serial(fpga::FPGA, idx::Integer)::String
   buf=Array{UInt8}(undef,11)
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetDeviceListSerial), Nothing, (Ptr{Nothing}, Int, Ptr{Char}), fpga.board, idx, buf)
   buf[end]=0
@@ -81,7 +81,7 @@ function set_bt_pipe_polling_interval(fpga::FPGA, interval::Int)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_SetBTPipePollingInterval), ErrorCode, (Ptr{Nothing}, Int), fpga.board, interval)
 end
 #void DLL_ENTRY okFrontPanel_SetTimeout(okFrontPanel_HANDLE hnd, int timeout);
-function set_timeout(fpga::FPGA, timeout::Int)::Int
+function set_timeout(fpga::FPGA, timeout::Integer)::Int
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_SetTimeout), Nothing, (Ptr{Nothing}, Cint), fpga.board, timeout)
 end
 #int DLL_ENTRY okFrontPanel_GetDeviceMajorVersion(okFrontPanel_HANDLE hnd);
@@ -115,7 +115,7 @@ function get_device_settings(fpga::FPGA, dev_settings_handle::Ptr{Nothing})::Err
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetDeviceSettings), ErrorCode, (Ptr{Nothing}, Ptr{Nothing}), fpga.board, dev_settings_handle)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_GetDeviceInfoWithSize(okFrontPanel_HANDLE hnd, okTDeviceInfo *info, unsigned size);
-function get_device_info_with_size(fpga::FPGA, size::UInt)::Tuple{ErrorCode,Any}
+function get_device_info_with_size(fpga::FPGA, size::Unsigned)::Tuple{ErrorCode,Any}
   dev_info::Ptr{Nothing} = Ptr{Nothing}(1)
   err = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetDeviceInfoWithSize), ErrorCode, (Ptr{Nothing}, Ptr{Nothing}, Cuint), fpga.board, dev_info, size)
   err, dev_info[]
@@ -173,7 +173,7 @@ function configure_fpga_from_memory_with_reset(fpga::FPGA, data::Vector{UInt8}, 
   ccall(Libdl.dlsym(fpga.lib,:okFrontPanel_ConfigureFPGAFromMemoryWithReset),ErrorCode,(Ptr{Nothing},Ptr{UInt8}, Culong, Ptr{Nothing}), fpga.board, data_slice, len, h_fpga_reset_profile)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_ConfigureFPGAFromFlash(okFrontPanel_HANDLE hnd, unsigned long configIndex);
-function configure_fpga_from_flash(fpga::FPGA, config_idx::UInt32)::Int
+function configure_fpga_from_flash(fpga::FPGA, config_idx::Unsigned)::Int
     ccall(Libdl.dlsym(fpga.lib,:okFrontPanel_ConfigureFPGAFromFlash),ErrorCode,(Ptr{Nothing},Culong),fpga.board, config_idx)
 end
 
@@ -193,13 +193,13 @@ function update_wire_ins(fpga::FPGA)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_UpdateWireIns), ErrorCode, (Ptr{Nothing},), fpga.board)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_GetWireInValue(okFrontPanel_HANDLE hnd, int epAddr, UINT32 *val);
-function get_wire_in_value(fpga::FPGA, ep_addr::Int)::Tuple{ErrorCode,UInt32}
+function get_wire_in_value(fpga::FPGA, ep_addr::Integer)::Tuple{ErrorCode,UInt32}
   val = Ptr{UInt32}(0)
   err = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetWireInValue), ErrorCode, (Ptr{Nothing}, Int, Ptr{Nothing}), fpga.board, ep_addr, val)
   err, val[]
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_SetWireInValue(okFrontPanel_HANDLE hnd, int ep, unsigned long val, unsigned long mask);
-function set_wire_in_value(fpga::FPGA, ep::Int, val::UInt32, mask::UInt32=0xffffffff)::ErrorCode
+function set_wire_in_value(fpga::FPGA, ep::Integer, val::Unsigned, mask::UInt32=0xffffffff)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_SetWireInValue), ErrorCode, (Ptr{Nothing}, Cint, Culong, Culong), fpga.board, ep, val, mask)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_UpdateWireOuts(okFrontPanel_HANDLE hnd);
@@ -207,11 +207,11 @@ function update_wire_outs(fpga::FPGA)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_UpdateWireOuts), ErrorCode, (Ptr{Nothing},), fpga.board)
 end
 #unsigned long DLL_ENTRY okFrontPanel_GetWireOutValue(okFrontPanel_HANDLE hnd, int epAddr);
-function get_wire_out_value(fpga::FPGA, ep_addr::Int)::UInt
+function get_wire_out_value(fpga::FPGA, ep_addr::Integer)::UInt
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetWireOutValue), Culong, (Ptr{Nothing}, Int32), fpga.board, ep_addr)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_ActivateTriggerIn(okFrontPanel_HANDLE hnd, int epAddr, int bit);
-function activate_trigger_in(fpga::FPGA, ep_addr::Int, bit::Int)::ErrorCode
+function activate_trigger_in(fpga::FPGA, ep_addr::Integer, bit::Integer)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ActivateTriggerIn), ErrorCode, (Ptr{Nothing}, Int32, Int32), fpga.board, ep_addr, bit)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_UpdateTriggerOuts(okFrontPanel_HANDLE hnd);
@@ -219,11 +219,11 @@ function update_trigger_outs(fpga::FPGA)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_UpdateTriggerOuts), ErrorCode, (Ptr{Nothing},), fpga.board)
 end
 #Bool DLL_ENTRY okFrontPanel_IsTriggered(okFrontPanel_HANDLE hnd, int epAddr, unsigned long mask);
-function is_triggered(fpga::FPGA, ep_addr::Int, mask::UInt32)::Bool
+function is_triggered(fpga::FPGA, ep_addr::Integer, mask::UInt32)::Bool
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_IsTriggered), Bool, (Ptr{Nothing}, Int, UInt32), fpga.board, ep_addr, mask)
 end
 #UINT32 DLL_ENTRY okFrontPanel_GetTriggerOutVector(okFrontPanel_HANDLE hnd, int epAddr);
-function get_trigger_out_vector(fpga::FPGA, ep_addr::Int)::UInt32
+function get_trigger_out_vector(fpga::FPGA, ep_addr::Integer)::UInt32
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetTriggerOutVector), UInt32, (Ptr{Nothing}, Int), fpga.board, ep_addr)
 end
 #long DLL_ENTRY okFrontPanel_GetLastTransferLength(okFrontPanel_HANDLE hnd);
@@ -231,17 +231,17 @@ function get_last_transfer_length(fpga::FPGA)::UInt
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetLastTransferLength), Cint, (Ptr{Nothing},), fpga.board)
 end
 #long DLL_ENTRY okFrontPanel_WriteToPipeIn(okFrontPanel_HANDLE hnd, int epAddr, long length, unsigned char *data);
-function write_to_pipe_in(fpga::FPGA, ep_addr::Int, len::UInt, data::Vector{UInt8})::UInt
+function write_to_pipe_in(fpga::FPGA, ep_addr::Integer, len::Unsigned, data::Vector{UInt8})::UInt
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToPipeIn), UInt32, (Ptr{Nothing}, Int, Int, Ptr{UInt8}), fpga.board, ep_addr, len, data)
 end
 #long DLL_ENTRY okFrontPanel_ReadFromPipeOut(okFrontPanel_HANDLE hnd, int epAddr, long length, unsigned char *data);
-function read_from_pipe_out(fpga::FPGA, ep_addr::Int, len::Int)::Tuple{ErrorCode, Vector{UInt8}}
+function read_from_pipe_out(fpga::FPGA, ep_addr::Integer, len::Integer)::Tuple{ErrorCode, Vector{UInt8}}
   data::Vector{UInt8} = Array{UInt8}(undef, len)
   ret_len = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromPipeOut), Clong, (Ptr{Nothing}, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, len, data)
   ErrorCode(ret_len>=0 ? ErrorCode.ok_NoError : ErrorCode(ret_len)), unsafe_wrap(Vector{UInt8}, data, ret_len)
 end
 #long DLL_ENTRY okFrontPanel_WriteToBlockPipeIn(okFrontPanel_HANDLE hnd, int epAddr, int blockSize, long length, unsigned char *data);
-function write_to_block_pipe_in(fpga::FPGA, ep_addr::Int, block_size::Int, len::Int, data::Vector{UInt8})::Union{ErrorCode, Int32}
+function write_to_block_pipe_in(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Integer, data::Vector{UInt8})::Union{ErrorCode, Int32}
   ret = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToBlockPipeIn), Clong, (Ptr{Nothing}, Int, Int, Int, Ptr{Char}), fpga.board, ep_addr, block_size, len, data)
   if ret < 0
     return ErrorCode(ret)
@@ -250,7 +250,7 @@ function write_to_block_pipe_in(fpga::FPGA, ep_addr::Int, block_size::Int, len::
   end
 end
 #long DLL_ENTRY okFrontPanel_ReadFromBlockPipeOut(okFrontPanel_HANDLE hnd, int epAddr, int blockSize, long length, unsigned char *data);
-function read_from_block_pipe_out(fpga::FPGA, ep_addr::Int, block_size::Int, len::UInt)::Tuple{ErrorCode,Vector{UInt8}}
+function read_from_block_pipe_out(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Unsigned)::Tuple{ErrorCode,Vector{UInt8}}
   data::Vector{UInt8} = Array{UInt8}(undef, len)
   err = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromBlockPipeOut), ErrorCode, (Ptr{Nothing}, Int32, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, block_size, len, data)
   err, data
@@ -261,13 +261,13 @@ end
 # ----------------------------------------------------------------------------
 
 #ok_ErrorCode DLL_ENTRY okFrontPanel_WriteI2C(okFrontPanel_HANDLE hnd, const int addr, int length, unsigned char *data);
-function write_i2c(fpga::FPGA, addr::Int, data::Vector{UInt8})::ErrorCode
+function write_i2c(fpga::FPGA, addr::Integer, data::Vector{UInt8})::ErrorCode
   len = length(data)
   data_slice = Array{UInt8}(data, len)
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteI2C), ErrorCode, (Ptr{Nothing}, Cint, Cint, Ptr{UInt8}), fpga.board, addr, len, data_slice)
 end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_ReadI2C(okFrontPanel_HANDLE hnd, const int addr, int length, unsigned char *data);
-function read_i2c(fpga::FPGA, addr::Int, len::Int)::Tuple{ErrorCode, Vector{UInt8}}
+function read_i2c(fpga::FPGA, addr::Integer, len::Integer)::Tuple{ErrorCode, Vector{UInt8}}
   data_slice = Array{UInt8}(undef, len)
   err = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadI2C), ErrorCode, (Ptr{Nothing}, Cint, Cint, Ptr{UInt8}), fpga.board, addr, len, data_slice)
   data = unsafe_wrap(Vector{UInt8}, data_slice, len)
