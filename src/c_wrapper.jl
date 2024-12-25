@@ -162,7 +162,7 @@ function configure_fpga_from_memory(fpga::FPGA, data::Vector{UInt8})::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ConfigureFPGAFromMemory), ErrorCode, (Ptr{Nothing}, Ptr{UInt8}, Culong), fpga.board, data_slice, len)
 end
 ##ok_ErrorCode DLL_ENTRY okFrontPanel_ConfigureFPGAFromMemoryWithProgress(okFrontPanel_HANDLE hnd, unsigned char *data, unsigned long length, okTProgressCallback callback, void *arg);
-#function configure_f_p_g_a_from_memory_with_progress(fpga::FPGA, data::Vector{UInt8}, len::Int, callback::)::Int
+#function configure_fpga_from_memory_with_progress(fpga::FPGA, data::Vector{UInt8}, len::Int, callback::)::Int
 #    ccall(Libdl.dlsym(fpga.lib,:okFrontPanel_ConfigureFPGAFromMemoryWithProgress),Int,(Ptr{Nothing},),fpga.board)
 #end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_ConfigureFPGAFromMemoryWithReset(okFrontPanel_HANDLE hnd, unsigned char *data, unsigned long length, const okTFPGAResetProfile *reset);
@@ -373,5 +373,3 @@ end
 #ok_ErrorCode DLL_ENTRY okFrontPanel_GetFPGAResetProfileWithSize(okFrontPanel_HANDLE hnd, ok_FPGAConfigurationMethod method, okTFPGAResetProfile *profile, unsigned size);
 #ok_ErrorCode DLL_ENTRY okFrontPanel_SetFPGAResetProfile(okFrontPanel_HANDLE hnd, ok_FPGAConfigurationMethod method, const okTFPGAResetProfile *profile);
 #ok_ErrorCode DLL_ENTRY okFrontPanel_SetFPGAResetProfileWithSize(okFrontPanel_HANDLE hnd, ok_FPGAConfigurationMethod method, const okTFPGAResetProfile *profile, unsigned size);
-#
-#

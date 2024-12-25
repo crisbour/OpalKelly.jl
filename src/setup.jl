@@ -34,6 +34,9 @@ function open_board(fpga::FPGA)
 end
 
 function upload_fpga_bitfile(fpga::FPGA, bit_file_path)
+  if !is_open(fpga)
+    @error "FPGA connection not opened! Cannot upload bitfile."
+  end
 
   #upload configuration file
   err::ErrorCode = configure_fpga(fpga, bit_file_path)
@@ -43,7 +46,6 @@ function upload_fpga_bitfile(fpga::FPGA, bit_file_path)
     # Log the bitfile path
     fpga.bitfile = bit_file_path
   end
-
 
   #Check if FrontPanel Support is enabled
   if !is_front_panel_enabled(fpga)

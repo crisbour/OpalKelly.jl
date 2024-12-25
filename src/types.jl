@@ -23,3 +23,12 @@ function FPGA(bitfile;usb3=false)
          0)
 end
 
+finalizer(FPGA) do fpga
+  @info "Cleaning up FPGA connection to OK FrontPanel"
+  if is_open(fpga)
+    close(fpga)
+  else
+    @warn "FPGA was not open. Program might have exited unexpectedly!"
+  end
+  destruct(fpga)
+end
