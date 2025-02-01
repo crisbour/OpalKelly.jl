@@ -61,7 +61,7 @@ end
 # Return:
 # - Length of the readout
 # - Vector of the data read
-function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; psize=nothing)::Tuple{Int, Vector{UInt8}}
+function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; psize=nothing)::Vector{UInt8}
   #READFROMBLOCKPIPEOUT  Read data from a Block PipeOut.
   #  epVALUE=READFROMBLOCKPIPEOUT(OBJ,epADDR,BLKSIZE,SIZE) reads SIZE number of elements
   #  from a PipeOut endpoint.  The elements of evVALUE are unsigned bytes
