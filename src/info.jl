@@ -1,13 +1,14 @@
+
 function info(fpga::FPGA)
   #DISPLAY  Display an okfrontpanel object.
 
-  if !IsOpen(fpga)
+  if !is_open(fpga)
     @warn "NO DEVICE OPEN."
   else
-    @printf("API version: %d.%d.%d\n", GetAPIVersionMajor(), GetAPIVersionMinor(), GetAPIVersionMicro())
-    println("Board model: ", GetBoardModel(fpga))
-    @printf("Firmware revision: %d.%d\n", GetDeviceMajorVersion(fpga), GetDeviceMinorVersion(fpga))
-    println("Serial number: ", GetSerialNumber(fpga))
-    println("Device ID: ", GetDeviceID(fpga))
+    @printf("API version: %d.%d.%d\n", get_api_version_major(), get_api_version_minor(), get_api_version_micro())
+    println("Board model: ", get_board_model(fpga))
+    @printf("Firmware revision: %d.%d\n", get_device_major_version(fpga), get_device_minor_version(fpga))
+    println("Serial number: ", get_serial_number(fpga))
+    println("Device ID: ", get_device_id(fpga))
   end
 end

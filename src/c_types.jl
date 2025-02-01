@@ -1,4 +1,5 @@
 
+# WARN: Why does the LSP warn me about missing reference of enum identifier
 @cenum BoardModel::Cuint begin
   ok_brdUnknown          = 0
   ok_brdXEM3001v1        = 1

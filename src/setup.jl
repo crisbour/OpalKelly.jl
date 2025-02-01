@@ -1,4 +1,4 @@
-export getlibrary, open_board, init_board!, uploadFpgaBitfile
+export getlibrary, open_board, init_board!, upload_fpga_bitfile
 
 getlibrary(fpgas::Vector{FPGA}) = map(getlibrary, fpgas)
 
@@ -55,6 +55,7 @@ function upload_fpga_bitfile(fpga::FPGA, bitfile_path)
   if err != ok_NoError
     @error "FPGA configuration failed with error: $err"
   else
+    @info "Firmware written successfuly"
     # Log the bitfile path
     fpga.bitfile = bitfile_path
   end

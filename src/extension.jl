@@ -1,3 +1,14 @@
+module Ext
+
+# NOTE: Wrap extension in an inner module in order to avoid confusion between c_wrapper methods and generalised calls from this module when using this API
+# - As Julia is not strictly typed, multiple dispatch must be treated with more caution
+# - Furthermore, Ext module uses the specific qualifier for the wrapper calls, in order to avoid recurrence
+# - In the future, change function names, as in fact they have slightly distinct semantics
+
+using ..OpalKelly
+
+export get_wire_out_value, set_wire_in_value, read_from_block_pipe_out, read_from_pipe_out, write_to_block_pipe_in, write_to_pipe_in
+
 function get_wire_out_value(fpga::FPGA, epaddr::Array{Integer})::Array{UInt8}
   #GETWIREOUTVALUE  Read the WireOut values from the device.
   #  epVAL=GETWIREOUTVALUE(OBJ,epADDR) returns the values of the WireOut
@@ -16,31 +27,31 @@ function get_wire_out_value(fpga::FPGA, epaddr::Array{Integer})::Array{UInt8}
   epval = zeros(size(epaddr))
   for i in 1:size(epaddr, 1)
     for j in 1:size(epaddr, 2)
-      epval[i, j] = get_wire_out_value(fpga, epaddr[i, j])
+      epval[i, j] = OpalKelly.get_wire_out_value(fpga, epaddr[i, j])
     end
   end
   epval
 end
 
-function set_wire_in_value(fpga::FPGA, epaddr::Array{Integer, D}, epvalue::Array{Integer, D}, epmask::Array{UInt32, D}) where D
+function set_wire_in_value(fpga::FPGA, epaddr::Array{Integer,D}, epvalue::Array{Integer,D}, epmask::Array{UInt32,D}) where {D}
 
-#SETWIREINVALUE  Write into WireIn values of the device.
-#  SETWIREINVALUE(OBJ,epADDR,epVALUE,epMASK) writes
-#  a value into a WireIn endpoint of a the device.
-#  The elements of epVALUE need to be ints (16 bits : 0..65535)
-#  stored as fints (floating point integers). epVALUE will have
-#  the same dimension as epADDR.
-#
-#  The valid endpoint address ranges are:
-#  * 0x00-0x1F : WireIn
-#    0x20-0x3F : WireOut
-#    0x40-0x5F : TriggerIn
-#    0x60-0x7F : TriggerOut
-#    0x80-0x9F : PipeIn
-#    0xA0-0xBF : PipeOut
+  #SETWIREINVALUE  Write into WireIn values of the device.
+  #  SETWIREINVALUE(OBJ,epADDR,epVALUE,epMASK) writes
+  #  a value into a WireIn endpoint of a the device.
+  #  The elements of epVALUE need to be ints (16 bits : 0..65535)
+  #  stored as fints (floating point integers). epVALUE will have
+  #  the same dimension as epADDR.
+  #
+  #  The valid endpoint address ranges are:
+  #  * 0x00-0x1F : WireIn
+  #    0x20-0x3F : WireOut
+  #    0x40-0x5F : TriggerIn
+  #    0x60-0x7F : TriggerOut
+  #    0x80-0x9F : PipeIn
+  #    0xA0-0xBF : PipeOut
   for i in 1:size(epaddr, 1)
     for j in 1:size(epaddr, 2)
-      set_wire_in_value(fpga, epaddr[i,j], epvalue[i,j], epmask[i,j])
+      OpalKelly.set_wire_in_value(fpga, epaddr[i, j], epvalue[i, j], epmask[i, j])
     end
   end
 end
@@ -77,14 +88,14 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; p
   epvalue::Vector{UInt8} = fill(UInt8(0), bsize)
 
   if psize == bsize
-    err, epvalue = read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
+    err, epvalue = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
     if err != ok_NoError
       @error "read_from_block_pipe_out failed with error: $err"
     end
   else
     kk = 1:psize
-    for k in 1:(bsize ÷ psize)
-      err, buf = read_from_block_pipe_out(fpga, epaddr, blksize, psize)
+    for k in 1:(bsize÷psize)
+      err, buf = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, psize)
       if err != ok_NoError
         @error "read_from_block_pipe_out failed with error: $err"
       end
@@ -93,7 +104,7 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; p
     end
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
-    err, buf = read_from_block_pipe_out(fpga, epaddr, blksize, psize_last)
+    err, buf = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, psize_last)
     epvalue[kk] = buf(1:psize_last)
   end
   epvalue
@@ -128,14 +139,14 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
   epvalue::Vector{UInt8} = fill(UInt8(0), bsize)
 
   if psize == bsize
-    err, epvalue = read_from_pipe_out(fpga, epaddr, bsize)
+    err, epvalue = OpalKelly.read_from_pipe_out(fpga, epaddr, bsize)
     if err != ok_NoError
       @error "read_from_pipe_out failed with error: $err"
     end
   else
     kk = 1:psize
     for k = 1:(bsize÷psize)
-      err, buf = read_from_pipe_out(fpga, epaddr, psize)
+      err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize)
       if err != ok_NoError
         @error "read_from_pipe_out failed with error: $err"
       end
@@ -144,7 +155,7 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
     end
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
-    err, buf = read_from_pipe_out(fpga, epaddr, psize_last)
+    err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize_last)
     if err != ok_NoError
       @error "read_from_pipe_out failed to read last chunk with error: $err"
     end
@@ -153,7 +164,7 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
   epvalue
 end
 
-function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::Vector{UInt8}; psize=nothing)::Union{ErrorCode, Int32}
+function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::Vector{UInt8}; psize=nothing)::Union{ErrorCode,Int32}
   #WRITETOBLOCKPIPEIN  Write data into a PipeIn.
   #  SUCCESS=WRITETOBLOCKPIPEIN(OBJ,epADDR,BLKSIZE,epVALUE) writes
   #  the elements of the vector epVALUE into a PipeIn endpoint.
@@ -179,10 +190,10 @@ function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::V
   if psize === nothing
     psize = bsize
   end
-  psize = min(psize,bsize);
+  psize = min(psize, bsize)
 
   if bsize == psize
-    err_or_len = write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue)
+    err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue)
     if err_or_len isa ErrorCode
       @error "write_to_block_pipe_in failed with error: $err_or_len"
       return err_or_len
@@ -190,20 +201,20 @@ function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::V
       @assert err_or_len == psize
     end
   else
-  	kk = 1:psize
-  	for k = 1:(bsize ÷ psize)
-      err_or_len = write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue[kk])
+    kk = 1:psize
+    for _ = 1:(bsize÷psize)
+      err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue[kk])
       if err_or_len isa ErrorCode
         @error "write_to_block_pipe_in failed with error: $err_or_len"
         return err_or_len
       else
         @assert err_or_len == psize
       end
-  		kk = kk + psize;
-  	end
-  	psize_last = mod(bsize,psize);
-    kk = kk[end] + (1:psize_last);
-    err_or_len = write_to_block_pipe_in(fpga, epaddr, blksize, psize_last, epvalue[kk])
+      kk = kk + psize
+    end
+    psize_last = mod(bsize, psize)
+    kk = kk[end] + (1:psize_last)
+    err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize_last, epvalue[kk])
     if err_or_len isa ErrorCode
       @error "write_to_block_pipe_in failed with error: $err_or_len"
       return err_or_len
@@ -215,33 +226,33 @@ function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::V
 end
 
 function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, psize)
-#WRITETOPIPEIN  Write data into a PipeIn.
-#  SUCCESS=WRITETOPIPEIN(OBJ,epADDR,epVALUE) writes
-#  the elements of the vector epVALUE into a PipeIn endpoint.
-#  The elements of epVALUE need to be unsigned bytes (8 bits : 0..255)
-#  stored as fints (floating point integers).
-#  epADDR the endpoint address of the PipeIn endpoint.
-#
-#  SUCCESS=WRITETOPIPEIN(OBJ,epADDR,epVALUE,PSIZE) subdivides
-#  transfer into multiple packets. The PSIZE contains the
-#  packet size of each packet, except for the last one.
-#
-#  The valid endpoint address ranges are:
-#
-#    0x00-0x1F : WireIn
-#    0x20-0x3F : WireOut
-#    0x40-0x5F : TriggerIn
-#    0x60-0x7F : TriggerOut
-#  * 0x80-0x9F : PipeIn
-#    0xA0-0xBF : PipeOut
+  #WRITETOPIPEIN  Write data into a PipeIn.
+  #  SUCCESS=WRITETOPIPEIN(OBJ,epADDR,epVALUE) writes
+  #  the elements of the vector epVALUE into a PipeIn endpoint.
+  #  The elements of epVALUE need to be unsigned bytes (8 bits : 0..255)
+  #  stored as fints (floating point integers).
+  #  epADDR the endpoint address of the PipeIn endpoint.
+  #
+  #  SUCCESS=WRITETOPIPEIN(OBJ,epADDR,epVALUE,PSIZE) subdivides
+  #  transfer into multiple packets. The PSIZE contains the
+  #  packet size of each packet, except for the last one.
+  #
+  #  The valid endpoint address ranges are:
+  #
+  #    0x00-0x1F : WireIn
+  #    0x20-0x3F : WireOut
+  #    0x40-0x5F : TriggerIn
+  #    0x60-0x7F : TriggerOut
+  #  * 0x80-0x9F : PipeIn
+  #    0xA0-0xBF : PipeOut
   bsize = length(epvalue)
   if psize === nothing
     psize = bsize
   end
-  psize = min(psize,bsize);
+  psize = min(psize, bsize)
 
   if bsize == psize
-    err_or_len = write_to_pipe_in(fpga, epaddr, psize, epvalue)
+    err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize, epvalue)
     if err_or_len isa ErrorCode
       @error "write_to_pipe_in failed with error: $err_or_len"
       return err_or_len
@@ -249,20 +260,20 @@ function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, p
       @assert err_or_len == psize
     end
   else
-  	kk = 1:psize
-  	for k = 1:(bsize ÷ psize)
-      err_or_len = write_to_pipe_in(fpga, epaddr, psize, epvalue[kk])
+    kk = 1:psize
+    for _ = 1:(bsize÷psize)
+      err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize, epvalue[kk])
       if err_or_len isa ErrorCode
         @error "write_to_pipe_in failed with error: $err_or_len"
         return err_or_len
       else
         @assert err_or_len == psize
       end
-  		kk = kk + psize;
-  	end
-  	psize_last = mod(bsize,psize);
-    kk = kk[end] + (1:psize_last);
-    err_or_len = write_to_pipe_in(fpga, epaddr, psize_last, epvalue[kk])
+      kk = kk + psize
+    end
+    psize_last = mod(bsize, psize)
+    kk = kk[end] + (1:psize_last)
+    err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize_last, epvalue[kk])
     if err_or_len isa ErrorCode
       @error "write_to_pipe_in failed with error: $err_or_len"
       return err_or_len
@@ -271,4 +282,6 @@ function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, p
     end
   end
   bsize
+end
+
 end
