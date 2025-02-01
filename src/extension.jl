@@ -58,7 +58,10 @@ end
 
 
 # read_from_block_pipe_out in packet size at a time
-function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; psize=nothing)::Vector{UInt8}
+# Return:
+# - Length of the readout
+# - Vector of the data read
+function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; psize=nothing)::Tuple{Int, Vector{UInt8}}
   #READFROMBLOCKPIPEOUT  Read data from a Block PipeOut.
   #  epVALUE=READFROMBLOCKPIPEOUT(OBJ,epADDR,BLKSIZE,SIZE) reads SIZE number of elements
   #  from a PipeOut endpoint.  The elements of evVALUE are unsigned bytes
@@ -88,17 +91,13 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; p
   epvalue::Vector{UInt8} = fill(UInt8(0), bsize)
 
   if psize == bsize
-    err, epvalue = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
-    if is_error(err)
-      @error "read_from_block_pipe_out failed with error: $err (int=$(Int(err)))"
-    end
+    err_or_len, epvalue = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
+    @inline check_err_or_len(err_or_len, bsize)
   else
     kk = 1:psize
     for k in 1:(bsize÷psize)
-      err, buf = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, psize)
-      if is_error(err)
-        @error "read_from_block_pipe_out failed with error: $err"
-      end
+      err_or_len, buf = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, psize)
+      @inline check_err_or_len(err_or_len, bsize)
       epvalue[kk] = buf
       kk = kk + psize
     end
@@ -139,32 +138,26 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
   epvalue::Vector{UInt8} = fill(UInt8(0), bsize)
 
   if psize == bsize
-    err, epvalue = OpalKelly.read_from_pipe_out(fpga, epaddr, bsize)
-    if is_error(err)
-      @error "read_from_pipe_out failed with error: $err"
-    end
+    err_or_len, epvalue = OpalKelly.read_from_pipe_out(fpga, epaddr, bsize)
+    @inline check_err_or_len(err_or_len, bsize)
   else
     kk = 1:psize
     for k = 1:(bsize÷psize)
-      err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize)
-      if is_error(err)
-        @error "read_from_pipe_out failed with error: $err"
-      end
+      err_or_len, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize)
+      @inline check_err_or_len(err_or_len, bsize)
       epvalue[kk] = buf
       kk = kk + psize
     end
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
-    err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize_last)
-    if is_error(err)
-      @error "read_from_pipe_out failed to read last chunk with error: $err"
-    end
+    err_or_len, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize_last)
+    @inline check_err_or_len(err_or_len, bsize)
     epvalue[kk] = buf(1:psize_last)
   end
   epvalue
 end
 
-function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::Vector{UInt8}; psize=nothing)::Union{ErrorCode,Int32}
+function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::Vector{UInt8}; psize=nothing)
   #WRITETOBLOCKPIPEIN  Write data into a PipeIn.
   #  SUCCESS=WRITETOBLOCKPIPEIN(OBJ,epADDR,BLKSIZE,epVALUE) writes
   #  the elements of the vector epVALUE into a PipeIn endpoint.
@@ -194,35 +187,19 @@ function write_to_block_pipe_in(fpga::FPGA, epaddr::Integer, blksize, epvalue::V
 
   if bsize == psize
     err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue)
-    if err_or_len isa ErrorCode
-      @error "write_to_block_pipe_in failed with error: $err_or_len"
-      return err_or_len
-    else
-      @assert err_or_len == psize
-    end
+    @inline check_err_or_len(err_or_len, bsize)
   else
     kk = 1:psize
     for _ = 1:(bsize÷psize)
       err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize, epvalue[kk])
-      if err_or_len isa ErrorCode
-        @error "write_to_block_pipe_in failed with error: $err_or_len"
-        return err_or_len
-      else
-        @assert err_or_len == psize
-      end
+      @inline check_err_or_len(err_or_len, bsize)
       kk = kk + psize
     end
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
     err_or_len = OpalKelly.write_to_block_pipe_in(fpga, epaddr, blksize, psize_last, epvalue[kk])
-    if err_or_len isa ErrorCode
-      @error "write_to_block_pipe_in failed with error: $err_or_len"
-      return err_or_len
-    else
-      @assert err_or_len == psize_last
-    end
+    @inline check_err_or_len(err_or_len, bsize)
   end
-  bsize
 end
 
 function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, psize)
@@ -253,35 +230,32 @@ function write_to_pipe_in(fpga::FPGA, epaddr::Integer, epvalue::Vector{UInt8}, p
 
   if bsize == psize
     err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize, epvalue)
-    if err_or_len isa ErrorCode
-      @error "write_to_pipe_in failed with error: $err_or_len"
-      return err_or_len
-    else
-      @assert err_or_len == psize
-    end
+    @inline check_err_or_len(err_or_len, bsize)
   else
     kk = 1:psize
     for _ = 1:(bsize÷psize)
       err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize, epvalue[kk])
-      if err_or_len isa ErrorCode
-        @error "write_to_pipe_in failed with error: $err_or_len"
-        return err_or_len
-      else
-        @assert err_or_len == psize
-      end
+      @inline check_err_or_len(err_or_len, bsize)
       kk = kk + psize
     end
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
     err_or_len = OpalKelly.write_to_pipe_in(fpga, epaddr, psize_last, epvalue[kk])
-    if err_or_len isa ErrorCode
-      @error "write_to_pipe_in failed with error: $err_or_len"
-      return err_or_len
-    else
-      @assert err_or_len == psize_last
-    end
+    @inline check_err_or_len(err_or_len, bsize)
   end
-  bsize
+end
+
+# --------------------------------------------------------------------------------
+# Utils
+# --------------------------------------------------------------------------------
+
+# Call this function with @inline to have error/warn report on the correct line number
+function check_err_or_len(err_or_len::OpalKelly.ResultLength, expected_len::Integer)
+  if is_error(err_or_len)
+    @error "Failed with error: $err_or_len"
+  elseif err_or_len != expected_len
+    @warn "Read/Wrote $err_or_len bytes compared with expected $expected_len bytes"
+  end
 end
 
 end
