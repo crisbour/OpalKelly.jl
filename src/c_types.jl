@@ -82,6 +82,12 @@ end
   ok_InvalidParameter     = -20
 end
 
+const ResultLength = Union{Int, ErrorCode}
+
+to_result_length(raw_len::Int) = if raw_len <= 0 convert(ErrorCode, raw_len) else Int(raw_len) end
+is_error(err_len::ResultLength) = err_len isa ErrorCode && err_len != ok_NoError
+is_error(err::ErrorCode) = err != ok_NoError
+
 struct okTRegisterEntry
 	address::UInt32
 	data::UInt32

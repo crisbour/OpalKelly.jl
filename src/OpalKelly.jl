@@ -8,8 +8,8 @@ using CEnum
 using Test
 using Printf
 
-export ErrorCode, BoardModel, FPGA
-export getlibrary, init_board!
+export ErrorCode, ResultLength, BoardModel, FPGA
+export getlibrary, init_board!, is_error
 export OKExtended
 
 include("constants.jl")

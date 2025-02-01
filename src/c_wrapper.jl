@@ -233,29 +233,26 @@ function get_last_transfer_length(fpga::FPGA)::UInt
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_GetLastTransferLength), Cint, (Ptr{Nothing},), fpga.board)
 end
 #long DLL_ENTRY okFrontPanel_WriteToPipeIn(okFrontPanel_HANDLE hnd, int epAddr, long length, unsigned char *data);
-function write_to_pipe_in(fpga::FPGA, ep_addr::Integer, len::Unsigned, data::Vector{UInt8})::UInt
-  ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToPipeIn), UInt32, (Ptr{Nothing}, Int, Int, Ptr{UInt8}), fpga.board, ep_addr, len, data)
+function write_to_pipe_in(fpga::FPGA, ep_addr::Integer, len::Unsigned, data::Vector{UInt8})::ResultLength
+  err_len = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToPipeIn), UInt32, (Ptr{Nothing}, Int, Int, Ptr{UInt8}), fpga.board, ep_addr, len, data)
+  to_result_length(err_len)
 end
 #long DLL_ENTRY okFrontPanel_ReadFromPipeOut(okFrontPanel_HANDLE hnd, int epAddr, long length, unsigned char *data);
-function read_from_pipe_out(fpga::FPGA, ep_addr::Integer, len::Integer)::Tuple{ErrorCode,Vector{UInt8}}
+function read_from_pipe_out(fpga::FPGA, ep_addr::Integer, len::Integer)::Tuple{ResultLength,Vector{UInt8}}
   data::Vector{UInt8} = Array{UInt8}(undef, len)
-  ret_len = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromPipeOut), Clong, (Ptr{Nothing}, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, len, data)
-  ErrorCode(ret_len >= 0 ? ErrorCode.ok_NoError : ErrorCode(ret_len)), unsafe_wrap(Vector{UInt8}, data, ret_len)
+  err_len = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromPipeOut), Clong, (Ptr{Nothing}, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, len, data)
+  to_result_length(err_len), data
 end
 #long DLL_ENTRY okFrontPanel_WriteToBlockPipeIn(okFrontPanel_HANDLE hnd, int epAddr, int blockSize, long length, unsigned char *data);
-function write_to_block_pipe_in(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Integer, data::Vector{UInt8})::Union{ErrorCode,Int32}
-  ret = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToBlockPipeIn), Clong, (Ptr{Nothing}, Int, Int, Int, Ptr{Char}), fpga.board, ep_addr, block_size, len, data)
-  if ret < 0
-    return ErrorCode(ret)
-  else
-    return Int32(ret)
-  end
+function write_to_block_pipe_in(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Integer, data::Vector{UInt8})::ResultLength
+  err_len = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_WriteToBlockPipeIn), Clong, (Ptr{Nothing}, Int, Int, Int, Ptr{Char}), fpga.board, ep_addr, block_size, len, data)
+  to_result_length(err_len)
 end
 #long DLL_ENTRY okFrontPanel_ReadFromBlockPipeOut(okFrontPanel_HANDLE hnd, int epAddr, int blockSize, long length, unsigned char *data);
-function read_from_block_pipe_out(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Unsigned)::Tuple{ErrorCode,Vector{UInt8}}
+function read_from_block_pipe_out(fpga::FPGA, ep_addr::Integer, block_size::Integer, len::Unsigned)::Tuple{ResultLength,Vector{UInt8}}
   data::Vector{UInt8} = Array{UInt8}(undef, len)
-  err = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromBlockPipeOut), ErrorCode, (Ptr{Nothing}, Int32, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, block_size, len, data)
-  err, data
+  err_len_raw = ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_ReadFromBlockPipeOut), Int, (Ptr{Nothing}, Int32, Int32, Clong, Ptr{UInt8}), fpga.board, ep_addr, block_size, len, data)
+  to_result_length(err_len_raw), data
 end
 
 # ----------------------------------------------------------------------------
