@@ -10,7 +10,7 @@ using Printf
 
 export ErrorCode, BoardModel, FPGA
 export getlibrary, init_board!
-export Ext
+export OKExtended
 
 include("constants.jl")
 

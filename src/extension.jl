@@ -1,4 +1,4 @@
-module Ext
+module OKExtended
 
 # NOTE: Wrap extension in an inner module in order to avoid confusion between c_wrapper methods and generalised calls from this module when using this API
 # - As Julia is not strictly typed, multiple dispatch must be treated with more caution
@@ -89,14 +89,14 @@ function read_from_block_pipe_out(fpga::FPGA, epaddr::Integer, blksize, bsize; p
 
   if psize == bsize
     err, epvalue = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, bsize)
-    if err != ok_NoError
+    if err != OpalKelly.ok_NoError
       @error "read_from_block_pipe_out failed with error: $err"
     end
   else
     kk = 1:psize
     for k in 1:(bsize÷psize)
       err, buf = OpalKelly.read_from_block_pipe_out(fpga, epaddr, blksize, psize)
-      if err != ok_NoError
+      if err != OpalKelly.ok_NoError
         @error "read_from_block_pipe_out failed with error: $err"
       end
       epvalue[kk] = buf
@@ -140,14 +140,14 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
 
   if psize == bsize
     err, epvalue = OpalKelly.read_from_pipe_out(fpga, epaddr, bsize)
-    if err != ok_NoError
+    if err != OpalKelly.ok_NoError
       @error "read_from_pipe_out failed with error: $err"
     end
   else
     kk = 1:psize
     for k = 1:(bsize÷psize)
       err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize)
-      if err != ok_NoError
+      if err != OpalKelly.ok_NoError
         @error "read_from_pipe_out failed with error: $err"
       end
       epvalue[kk] = buf
@@ -156,7 +156,7 @@ function read_from_pipe_out(fpga::FPGA, epaddr::Integer, bsize; psize=nothing)::
     psize_last = mod(bsize, psize)
     kk = kk[end] + (1:psize_last)
     err, buf = OpalKelly.read_from_pipe_out(fpga, epaddr, psize_last)
-    if err != ok_NoError
+    if err != OpalKelly.ok_NoError
       @error "read_from_pipe_out failed to read last chunk with error: $err"
     end
     epvalue[kk] = buf(1:psize_last)
