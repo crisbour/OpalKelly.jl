@@ -43,3 +43,7 @@ led_test (generic function with 1 method)
 julia> test_random_leds(fpga)
 ok_NoError::ErrorCode = 0
 ```
+
+## TODO
+
+- [ ] Write documentation inline with code and generate docs webpage
