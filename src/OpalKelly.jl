@@ -5,7 +5,6 @@ module OpalKelly
 using Libdl
 using Logging
 using CEnum
-using Test
 using Printf
 
 export ErrorCode, ResultLength, BoardModel, FPGA
@@ -22,8 +21,6 @@ include("extension.jl")
 
 include("info.jl")
 include("setup.jl")
-include("test.jl")
 include("utils.jl")
-
 
 end
