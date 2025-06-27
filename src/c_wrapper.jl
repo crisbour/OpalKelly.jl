@@ -83,7 +83,7 @@ function set_bt_pipe_polling_interval(fpga::FPGA, interval::Int)::ErrorCode
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_SetBTPipePollingInterval), ErrorCode, (Ptr{Nothing}, Int), fpga.board, interval)
 end
 #void DLL_ENTRY okFrontPanel_SetTimeout(okFrontPanel_HANDLE hnd, int timeout);
-function set_timeout(fpga::FPGA, timeout::Integer)::Int
+function set_timeout(fpga::FPGA, timeout::Integer)
   ccall(Libdl.dlsym(fpga.lib, :okFrontPanel_SetTimeout), Nothing, (Ptr{Nothing}, Cint), fpga.board, timeout)
 end
 #int DLL_ENTRY okFrontPanel_GetDeviceMajorVersion(okFrontPanel_HANDLE hnd);
