@@ -84,7 +84,7 @@ end
 
 const ResultLength = Union{Int, ErrorCode}
 
-to_result_length(raw_len::Int) = if raw_len < 0 ErrorCode(raw_len) else Int(raw_len) end
+to_result_length(raw_len::Integer) = if raw_len < 0 ErrorCode(raw_len) else Int(raw_len) end
 is_error(err_len::ResultLength) = err_len isa ErrorCode && err_len != ok_NoError
 is_error(err::ErrorCode) = err != ok_NoError
 
