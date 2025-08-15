@@ -31,7 +31,7 @@ function open_board(fpga::FPGA)
     end
     id = get_device_id(fpga)
     board_model = get_board_model(fpga)
-    board_model_str = get_baord_model_string(board_model)
+    board_model_str = get_board_model_string(board_model)
     @info "Device opened with id=$id and board model=$board_model_str"
 
     fpga.board_model = board_model_str
