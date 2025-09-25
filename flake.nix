@@ -1,7 +1,7 @@
 {
   description = "A Nix-flake-based C/C++ development environment";
 
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
   outputs = { self, nixpkgs }:
     let
@@ -24,17 +24,17 @@
               codespell
               conan
               cppcheck
-              doxygen
               gtest
               lcov
 
               # For C++ development:
               pkg-config
               udev
+              lua5_3_compat # Added Lua 5.3 here
             ] ++ (if system == "aarch64-darwin" then [ ] else [ gdb ]);
 
             shellHook = ''
-              export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.udev}/lib:${pkgs.stdenv.cc.cc.lib}/lib
+              export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.udev}/lib:${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.lua5_3_compat}/lib
             '';
           };
       });
